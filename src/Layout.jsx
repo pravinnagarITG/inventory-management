@@ -1,6 +1,6 @@
 import { Box, Text, Icon, InlineGrid, BlockStack, Card, Button } from "@shopify/polaris";
 import { Outlet, NavLink} from "react-router-dom";
-import { HomeIcon, ExitIcon, ProfileIcon } from '@shopify/polaris-icons';
+import { HomeIcon, ExitIcon, ProfileIcon, ProductListIcon } from '@shopify/polaris-icons';
 import { PersonFilledIcon } from '@shopify/polaris-icons';
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +15,7 @@ export default function Layout() {
     if(delUser){
       localStorage.removeItem("authToken");
       localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
       localStorage.removeItem("currentPage");
        navigate('/');
     }
@@ -33,6 +34,15 @@ export default function Layout() {
           })}>  
            <Icon source={HomeIcon}/>
            <Text variant="headingMd" fontWeight="medium">Dashboard</Text>
+          </NavLink>
+        </Box>
+
+          <Box paddingBlock="">
+          <NavLink to="/products" style={({ isActive }) => ({
+            textDecoration: "none", color:"var(--p-color-bg-surface)", display:"flex", gap:"var(--p-space-150)", padding:"10px"
+          })}>  
+           <Icon source={ProductListIcon}/>
+           <Text variant="headingMd" fontWeight="medium">All Products</Text>
           </NavLink>
         </Box>
 

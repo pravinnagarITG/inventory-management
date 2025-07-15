@@ -39,18 +39,18 @@ export default function Login() {
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
       setSuccess(data.message);
        // Extract and store the token
       const token = data.token;
       const role = data.role;
+      const userId = data.id;
       if (token && role) {
-        console.log(role)
         localStorage.setItem('authToken', token);
         localStorage.setItem('userRole', role);
+        localStorage.setItem('userId', userId);
         setTimeout(() =>{
         navigate('/dashboard');
-        }, 800);
+        }, 700);
       } else {
         throw new Error('No token received from server.');
       }

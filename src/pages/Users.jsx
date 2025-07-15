@@ -18,6 +18,7 @@ export default function Users() {
   const [editModalOpen, editSetModalOpen] = useState(false);
   const [editUserId, setUserId] = useState(null);
 
+
   // Email validation regex (checks for @ and .)
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -121,10 +122,10 @@ export default function Users() {
       const data = await response.json();
       console.log('Add User API Response:', data);
       setSuccess('User added successfully!');
-      setTimeout(() => {
-        handleModalClose();
-        fetchUsers();
-      }, 1500);
+        setTimeout(() => {
+          handleModalClose();
+          fetchUsers();
+        }, 1500);
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
       console.error('Error adding user:', err);
@@ -166,7 +167,7 @@ export default function Users() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body:JSON.stringify({email: editEmail, password: editPassword })
+        body:JSON.stringify({email: editEmail, password: editPassword, role: 'user' })
       });
 
       if (!response.ok) {
@@ -174,11 +175,18 @@ export default function Users() {
       }
       const data = await response.json();
       setSuccess(data.message);
-      console.log('Edit User API Response:', data);
-      setTimeout(() => {
-        handleModalClose();
-        fetchUsers();
-      }, 1500);
+      // Check if the edited user is the current logged-in user
+      if (editUserId === localStorage.getItem('userId')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+        navigate('/');
+      } else {
+        setTimeout(() => {
+          handleModalClose();
+          fetchUsers();
+        }, 1500);
+      }
     } catch (err) {
       setError(err.message || 'Failed to edit user.');
       console.error('Error editing user:', err);
@@ -210,7 +218,14 @@ export default function Users() {
       if (!response.ok) {
         throw new Error('Failed to delete user.');
       }
-      fetchUsers();
+      if (userId === localStorage.getItem('userId')) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+        navigate('/');
+      } else {
+        fetchUsers();
+      }
     } catch (err) {
       setError(err.message || 'Failed to delete user.');
       console.error('Error deleting user:', err);

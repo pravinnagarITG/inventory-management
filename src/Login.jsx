@@ -45,17 +45,18 @@ export default function Login() {
       }
       
       const data = await response.json();
-      console.log(data);
       setSuccess(data.message);
        // Extract and store the token
       const token = data.token;
       const role = data.role;
-      const userId = data.id;
+      const userEmail = data.email;
+      const userPass = data.password;
 
       if (token && role) {
         localStorage.setItem('authToken', token);
         localStorage.setItem('userRole', role.trim().toLowerCase());
-        localStorage.setItem('userId', userId);
+        localStorage.setItem('userEmail', userEmail);
+        localStorage.setItem('userPass', userPass);
 
         setTimeout(() =>{
         navigate('/dashboard');
@@ -114,7 +115,6 @@ export default function Login() {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(value) => setPassword(value)}
-              autoComplete="current-password"
               error={password && !isValidPassword(password) ? 'Password must be at least 8 characters long.' : null}
                     suffix={
                       <span

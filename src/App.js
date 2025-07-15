@@ -14,23 +14,23 @@ import Layout from './Layout';
 function ProtectedRoute({ children, requiredRole }) { 
   const isAuthenticated = !!localStorage.getItem('authToken');
   const userRole = localStorage.getItem('userRole');
-  const userId = localStorage.getItem('userId');
+  const userEmail = localStorage.getItem('userEmail');
+  const userPass = localStorage.getItem('userPass');
   const navigate = useNavigate();
 
     useEffect(() => {
     const validateSession = async () => {
-      if (!isAuthenticated || !userId) {
-        console.log('No auth token or userId, logging out:', { isAuthenticated, userId });
+      if (!isAuthenticated || !userEmail) {
+        console.log('No auth token or userId, logging out:', { isAuthenticated, userEmail });
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('userId');
+       localStorage.removeItem('userPass');
+       localStorage.removeItem('userEmail');
         navigate('/');
         return;
       }
 
-      // Skip validation for admins, as they are not in /users response
       if (userRole === 'admin') {
-        console.log('Admin detected, skipping /users API validation:', { userId, userRole });
         return;
       }
 
@@ -46,37 +46,37 @@ function ProtectedRoute({ children, requiredRole }) {
         }
 
         const data = await response.json();
-        console.log('Users API response:', data);
         const users = data.users || [];
-        const currentUser = users.find(user => user._id === userId);
+        const currentUser = users.find(user => user.email === userEmail && user.password === userPass);
 
         if (!currentUser) {
-          console.log('User not found in /users response:', { userId, users });
           localStorage.removeItem('authToken');
           localStorage.removeItem('userRole');
-          localStorage.removeItem('userId');
+          localStorage.removeItem('userPass');
+          localStorage.removeItem('userEmail');
           navigate('/');
           return;
         }
 
         if (currentUser.role !== userRole) {
-          console.log('Role mismatch:', { apiRole: currentUser.role, localRole: userRole });
           localStorage.removeItem('authToken');
           localStorage.removeItem('userRole');
-          localStorage.removeItem('userId');
+          localStorage.removeItem('userPass');
+          localStorage.removeItem('userEmail');
           navigate('/');
         }
       } catch (err) {
         console.error('Error validating session:', err);
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('userId');
+        localStorage.removeItem('userPass');
+        localStorage.removeItem('userEmail');
         navigate('/');
       }
     };
 
     validateSession();
-  }, [isAuthenticated, userId, userRole, navigate]);
+  }, [isAuthenticated, userEmail, userPass, userRole, navigate]);
 
    if (!isAuthenticated) {
     return <Navigate to="/" replace />;

@@ -10,14 +10,16 @@ export default function Layout() {
   // logout
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole');
-  const userId = localStorage.getItem('userId');
+  const userEmail = localStorage.getItem('userEmail');
+  const userPass = localStorage.getItem('userPass');
 
   const logout = () =>{
     const delUser = window.confirm('Are you sure to logout');
     if(delUser){
       localStorage.removeItem("authToken");
       localStorage.removeItem("userRole");
-      localStorage.removeItem("userId");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userPass");
       localStorage.removeItem("currentPage");
        navigate('/');
     }
@@ -39,31 +41,32 @@ export default function Layout() {
 
           const data = await response.json();
           const users = data.users || [];
-          const currentUser = users.find(user => user._id === userId);
+          const currentUser = users.find(user => user.email === userEmail && user.password === userPass);
 
           if (!currentUser || currentUser.role !== userRole) {
-            console.log('Session invalid during polling:', { userId, users });
             localStorage.removeItem('authToken');
             localStorage.removeItem('userRole');
-            localStorage.removeItem('userId');
+            localStorage.removeItem('userPass');
+            localStorage.removeItem('userEmail');
             navigate('/');
           }
         } catch (err) {
           console.error('Error during session polling:', err);
           localStorage.removeItem('authToken');
           localStorage.removeItem('userRole');
-          localStorage.removeItem('userId');
+          localStorage.removeItem('userPass');
+          localStorage.removeItem('userEmail');
           navigate('/');
         }
       };
 
       // Poll every 30 seconds
-      const interval = setInterval(validateSession, 30000);
+      const interval = setInterval(validateSession, 20000);
 
       // Clean up interval on component unmount
       return () => clearInterval(interval);
     }
-  }, [userRole, userId, navigate]);
+  }, [userRole, userEmail, userPass, navigate]);
 
   return (
     <div className="dasborad-content">

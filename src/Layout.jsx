@@ -3,12 +3,14 @@ import { Outlet, NavLink} from "react-router-dom";
 import { HomeIcon, ExitIcon, ProfileIcon, ProductListIcon } from '@shopify/polaris-icons';
 import { PersonFilledIcon } from '@shopify/polaris-icons';
 import { useNavigate } from "react-router-dom";
+import { useEffect } from 'react';
 
 export default function Layout() {
 
   // logout
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole');
+  const userId = localStorage.getItem('userId');
 
   const logout = () =>{
     const delUser = window.confirm('Are you sure to logout');
@@ -20,7 +22,48 @@ export default function Layout() {
        navigate('/');
     }
   }
+// Polling for session validation for non-admin users
+  useEffect(() => {
+    if (userRole !== 'admin') {
+      const validateSession = async () => {
+        try {
+          const response = await fetch('https://inventory-management-mauve-seven.vercel.app/users', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            },
+          });
 
+          if (!response.ok) {
+            throw new Error('Failed to fetch users');
+          }
+
+          const data = await response.json();
+          const users = data.users || [];
+          const currentUser = users.find(user => user._id === userId);
+
+          if (!currentUser || currentUser.role !== userRole) {
+            console.log('Session invalid during polling:', { userId, users });
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userId');
+            navigate('/');
+          }
+        } catch (err) {
+          console.error('Error during session polling:', err);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userId');
+          navigate('/');
+        }
+      };
+
+      // Poll every 30 seconds
+      const interval = setInterval(validateSession, 30000);
+
+      // Clean up interval on component unmount
+      return () => clearInterval(interval);
+    }
+  }, [userRole, userId, navigate]);
 
   return (
     <div className="dasborad-content">

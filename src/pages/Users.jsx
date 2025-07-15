@@ -17,7 +17,7 @@ export default function Users() {
   const [editPassword, editSetPassword] = useState('');
   const [editModalOpen, editSetModalOpen] = useState(false);
   const [editUserId, setUserId] = useState(null);
-
+  const role = 'user';
 
   // Email validation regex (checks for @ and .)
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -108,7 +108,7 @@ export default function Users() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
       });
 
       if (!response.ok) {

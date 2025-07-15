@@ -109,7 +109,9 @@ a.active {
 .Polaris-DataTable__Table .Polaris-DataTable__Cell--numeric {
     text-align: left;
 }
-
+.Polaris-TextField input:-internal-autofill-selected {
+ background-color: #c1dfe338 !important;
+}
 @media screen and (max-width: 900px) {
 .dasborad-content {
     flex-wrap: wrap;

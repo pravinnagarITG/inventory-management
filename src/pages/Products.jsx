@@ -338,7 +338,7 @@ const syncProducts = async () => {
       <LegacyCard>
        {loading ? (
         <> 
-            <div style={{ textAlign: 'center', padding: '1rem' }}>
+           <div style={{ textAlign: 'center', padding: '1rem' }}>
               <Spinner accessibilityLabel="Loading inventory" size="large" />
             </div>
             <div style={{ textAlign: 'center', padding: '1rem' }}>

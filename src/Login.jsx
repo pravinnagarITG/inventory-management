@@ -37,6 +37,7 @@ export default function Login() {
       });
 
       if (!response.ok) {
+        setLoading(false);
         throw new Error('Login failed. Please check your credentials.');
       }
 
@@ -127,7 +128,7 @@ export default function Login() {
                       </span>
                     }
             />
-            <Button submit variant="primary" onClick={() => console.log(`Email: ${email}\nPassword: ${password}`)}>
+            <Button submit variant="primary" onClick={() => console.log(`Email: ${email}`)}>
               Log In
             </Button>
           </FormLayout>

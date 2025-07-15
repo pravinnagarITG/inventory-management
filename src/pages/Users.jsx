@@ -186,11 +186,21 @@ export default function Users() {
     }
   }
 
+  const [modalActive, setModalActive] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+
+      const handleOpenModal = useCallback((userId) => {
+        setSelectedUserId(userId);
+        setModalActive(true)
+      }, []);
+
+     const handleCloseModal = useCallback(() => {
+      setModalActive(false);
+      setSelectedUserId(null); // clear selected user on close
+     }, []);
 
   // Handle Delete
   const handleDelete = async (userId) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this user?');
-    if (!confirmDelete) return;
 
     try {
       setError(null);
@@ -211,12 +221,14 @@ export default function Users() {
       if (!response.ok) {
         throw new Error('Failed to delete user.');
       }
+       setModalActive(false);
         fetchUsers();
     } catch (err) {
       setError(err.message || 'Failed to delete user.');
       console.error('Error deleting user:', err);
     }
   };
+
 
   // Format rows for DataTable
   const rows = users.map((user) => [
@@ -225,7 +237,7 @@ export default function Users() {
     <Button key={`edit-${user._id}`} onClick={() => editUser(user._id, user.email, user.password)}>
       Edit
     </Button>,
-    <Button key={`delete-${user._id}`} destructive onClick={() => handleDelete(user._id)}>
+    <Button key={`delete-${user._id}`} destructive onClick={() => handleOpenModal(user._id)}>
       Delete
     </Button>,
   ]);
@@ -401,6 +413,33 @@ export default function Users() {
         </EmptyState>
         </div>
       )}
+       <div style={{ height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Modal
+              activator={handleOpenModal}
+              open={modalActive}
+              onClose={handleCloseModal}
+              title="Delete User"
+              primaryAction={{
+                content: 'Delete',
+                onAction: () => handleDelete(selectedUserId),
+                destructive: true,
+              }}
+              secondaryActions={[
+                {
+                  content: 'Cancel',
+                  onAction: handleCloseModal,
+                },
+              ]}
+            >
+              <Modal.Section>
+                <div className="modal-content">
+                  <Text variant="headingMd" as="h6">
+                   Are you sure you want to delete this user?
+                  </Text>
+                </div>
+              </Modal.Section>
+            </Modal>
+        </div>
   </>
   );
 }

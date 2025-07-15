@@ -115,13 +115,13 @@ useEffect(() => {
                 SKU
               </Text>,
               <Text key="quantity" variant="headingMd" fontWeight="bold" as="h6">
-               Order Quantity
+               Quantity
               </Text>,
               <Text key="store-name" variant="headingMd" fontWeight="bold" as="h6">
                 Store Name
               </Text>,
                <Text key="date" variant="headingMd" fontWeight="bold" as="h6">
-                Date & Time
+                Date
               </Text>,
             ]}
             rows={tableRows} 

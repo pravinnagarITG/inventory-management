@@ -1,9 +1,9 @@
-import { Box, Text, Icon, InlineGrid, BlockStack, Card, Button } from "@shopify/polaris";
+import { Box, Text, Icon, InlineGrid, BlockStack, Card, Button, Modal } from "@shopify/polaris";
 import { Outlet, NavLink} from "react-router-dom";
 import { HomeIcon, ExitIcon, ProfileIcon, ProductListIcon } from '@shopify/polaris-icons';
 import { PersonFilledIcon } from '@shopify/polaris-icons';
 import { useNavigate } from "react-router-dom";
-import { useEffect } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 
 export default function Layout() {
 
@@ -14,15 +14,12 @@ export default function Layout() {
   const userPass = localStorage.getItem('userPass');
 
   const logout = () =>{
-    const delUser = window.confirm('Are you sure to logout');
-    if(delUser){
       localStorage.removeItem("authToken");
       localStorage.removeItem("userRole");
       localStorage.removeItem("userEmail");
       localStorage.removeItem("userPass");
       localStorage.removeItem("currentPage");
        navigate('/');
-    }
   }
 // Polling for session validation for non-admin users
   useEffect(() => {
@@ -60,13 +57,15 @@ export default function Layout() {
         }
       };
 
-      // Poll every 30 seconds
       const interval = setInterval(validateSession, 20000);
-
-      // Clean up interval on component unmount
       return () => clearInterval(interval);
     }
   }, [userRole, userEmail, userPass, navigate]);
+
+      const [modalActive, setModalActive] = useState(false);
+      const handleOpenModal = useCallback(() => setModalActive(true), []);
+      const handleCloseModal = useCallback(() => setModalActive(false), []);
+
 
   return (
     <div className="dasborad-content">
@@ -105,7 +104,7 @@ export default function Layout() {
     
      </div>
       {/* Main Content */}
-      <div className="right-side-content">
+    <div className="right-side-content">
      <Card roundedAbove="0">
       <BlockStack gap="200">
         <InlineGrid columns="1fr auto" gap="100" alignItems="center">
@@ -113,7 +112,7 @@ export default function Layout() {
            <Icon source={ProfileIcon} />
           </div>
           <Button
-            onClick={() =>  logout()}
+            onClick={() =>  handleOpenModal()}
             accessibilityLabel="Log out"
             variant="primary"
             icon={ExitIcon}
@@ -123,8 +122,35 @@ export default function Layout() {
         </InlineGrid>
       </BlockStack>
     </Card>
-        <Outlet />
+    <Outlet />
     </div>
+     <div style={{ height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Modal
+              activator={handleOpenModal}
+              open={modalActive}
+              onClose={handleCloseModal}
+              title="Log out"
+              primaryAction={{
+                content: 'Log out',
+                onAction: logout,
+                destructive: true,
+              }}
+              secondaryActions={[
+                {
+                  content: 'Cancel',
+                  onAction: handleCloseModal,
+                },
+              ]}
+            >
+              <Modal.Section>
+                <div className="modal-content">
+                  <Text variant="headingMd" as="h6">
+                   Are you sure you want to log out?
+                  </Text>
+                </div>
+              </Modal.Section>
+            </Modal>
+        </div>
     </div>
   );
 }

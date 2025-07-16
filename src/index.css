@@ -136,6 +136,16 @@ button#toggle .Polaris-Icon {
     width: 16px;
     height: 16px;
 }
+.Polaris-TextField .Polaris-TextField__Input{
+  min-width: 60px;
+}
+.Polaris-DataTable__Table .Polaris-LegacyStack{
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.Polaris-DataTable__Table .Polaris-DataTable__Cell--firstColumn {
+    white-space: nowrap;
+}
 @media screen and (max-width: 1024px) {
 .dasborad-content {
     flex-wrap: wrap;
@@ -174,6 +184,7 @@ button#toggle{
   justify-content: space-between;
   padding-bottom: 20px;
 }
+
 }
 @media screen and (max-width: 768px) {
 .Polaris-TextField__Spinner {

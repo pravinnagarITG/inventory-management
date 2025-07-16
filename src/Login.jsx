@@ -46,6 +46,7 @@ export default function Login() {
       }
       
       const data = await response.json();
+      console.log(data)
       setSuccess(data.message);
        // Extract and store the token
       const token = data.token;
@@ -117,16 +118,16 @@ export default function Login() {
               value={password}
               onChange={(value) => setPassword(value)}
               error={password && !isValidPassword(password) ? 'Password must be at least 8 characters long.' : null}
-                    suffix={
-                      <span
-                        onClick={togglePasswordVisibility}
-                        style={{ cursor: 'pointer', backgroundColor:"red" }}
-                        role="button"
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      >
-                        <Icon source={showPassword ? HideIcon : ViewIcon} />
-                      </span>
-                    }
+              suffix={
+                <span
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: 'pointer', backgroundColor:"red" }}
+                  role="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <Icon source={showPassword ? HideIcon : ViewIcon} />
+                </span>
+              }
             />
             <Button submit variant="primary" onClick={() => console.log(`Email: ${email}`)}>
               Log In

@@ -43,7 +43,7 @@ useEffect(() => {
           store_name:item.store_name,
           date:item.createdAt
         }));
-
+      formatted.reverse();
       setRows(formatted);
       setHasNext(data.hasNext || formatted.length === itemsPerPage);
     } catch (error) {

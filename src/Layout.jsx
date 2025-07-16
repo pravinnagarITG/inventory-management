@@ -1,11 +1,15 @@
-import { Box, Text, Icon, InlineGrid, BlockStack, Card, Button, Modal } from "@shopify/polaris";
+import { Box, Text, Icon, InlineGrid, BlockStack, Card, Button } from "@shopify/polaris";
 import { Outlet, NavLink} from "react-router-dom";
-import { HomeIcon, ExitIcon, ProfileIcon, ProductListIcon } from '@shopify/polaris-icons';
+import { HomeIcon, ExitIcon, ProfileIcon, ProductListIcon, ListBulletedIcon, XIcon } from '@shopify/polaris-icons';
 import { PersonFilledIcon } from '@shopify/polaris-icons';
 import { useNavigate } from "react-router-dom";
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
+import CustomModal from './CustomModal';
+
 
 export default function Layout() {
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // logout
   const navigate = useNavigate();
@@ -62,10 +66,24 @@ export default function Layout() {
     }
   }, [userRole, userEmail, userPass, navigate]);
 
-      const [modalActive, setModalActive] = useState(false);
-      const handleOpenModal = useCallback(() => setModalActive(true), []);
-      const handleCloseModal = useCallback(() => setModalActive(false), []);
+        const [modalOpen, setModalOpen] = useState(false);
+        const [modalContent, setModalContent] = useState(null);
+        const [modalTitle, setModalTitle] = useState('');
+        const [eventTitle, setEventTitle] = useState('');
 
+          const handleOpen = (title, content, eventTitle) => {
+            setModalTitle(title);
+            setModalContent(content);
+            setModalOpen(true);
+            setEventTitle(eventTitle);
+          };
+
+          const closeModals = () =>{
+            setModalTitle('');
+            setModalContent('');
+            setModalOpen(false);
+            setEventTitle('');
+          }
 
   return (
     <div className="dasborad-content">
@@ -73,6 +91,11 @@ export default function Layout() {
       
        <img src="Logo.png" width="140px" alt="logo" style={{margin:"0 0 18px 10px"}} />
 
+      <div className={`dashboard-options ${drawerOpen ? 'open' : ''}`}>
+        <div className="toogle-close">
+          <img src="Logo.png" width="100px" alt="logo" style={{margin:"0 0 0px 10px"}} />
+          <Button id="toggle" icon={XIcon} onClick={() => setDrawerOpen(false)}/>
+        </div>
         <Box paddingBlock="">
           <NavLink to="/dashboard" style={({ isActive }) => ({
             textDecoration: "none", color:"var(--p-color-bg-surface)", display:"flex", gap:"var(--p-space-150)", padding:"10px"
@@ -101,9 +124,11 @@ export default function Layout() {
             </NavLink>
           </Box>
         )}
-    
+      </div>
+       <Button size="large" id="toggle" icon={drawerOpen ? XIcon : ListBulletedIcon} onClick={() => setDrawerOpen(drawerOpen ? false : true)} />
      </div>
       {/* Main Content */}
+
     <div className="right-side-content">
      <Card roundedAbove="0">
       <BlockStack gap="200">
@@ -112,7 +137,7 @@ export default function Layout() {
            <Icon source={ProfileIcon} />
           </div>
           <Button
-            onClick={() =>  handleOpenModal()}
+            onClick={() =>  handleOpen('Log out', 'Are you sure you want to log out?', 'Log out')}
             accessibilityLabel="Log out"
             variant="primary"
             icon={ExitIcon}
@@ -124,33 +149,9 @@ export default function Layout() {
     </Card>
     <Outlet />
     </div>
-     <div style={{ height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Modal
-              activator={handleOpenModal}
-              open={modalActive}
-              onClose={handleCloseModal}
-              title="Log out"
-              primaryAction={{
-                content: 'Log out',
-                onAction: logout,
-                destructive: true,
-              }}
-              secondaryActions={[
-                {
-                  content: 'Cancel',
-                  onAction: handleCloseModal,
-                },
-              ]}
-            >
-              <Modal.Section>
-                <div className="modal-content">
-                  <Text variant="headingMd" as="h6">
-                   Are you sure you want to log out?
-                  </Text>
-                </div>
-              </Modal.Section>
-            </Modal>
-        </div>
+       <CustomModal open={modalOpen} onClose={() => closeModals()} onAction={() => logout()} title={modalTitle} buttonText={eventTitle}>
+        {modalContent}
+      </CustomModal>
     </div>
   );
 }

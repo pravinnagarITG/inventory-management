@@ -1,6 +1,8 @@
-import { LegacyStack, Modal, FormLayout, TextField, EmptyState, Banner, DataTable, Button, Text, Page, LegacyCard, Spinner } from '@shopify/polaris';
+import { LegacyStack, Modal, FormLayout, TextField, EmptyState, Banner, DataTable, Button, Text, Page, LegacyCard, Spinner, Icon } from '@shopify/polaris';
 import { useState, useEffect, useCallback } from 'react';
+import { ViewIcon, HideIcon, EditIcon, DeleteIcon } from '@shopify/polaris-icons';
 import { useNavigate } from 'react-router-dom';
+import CustomModal from '../CustomModal';
 
 export default function Users() {
   const navigate = useNavigate();
@@ -12,6 +14,8 @@ export default function Users() {
   const [success, setSuccess] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addingUser, setAddingUser] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [editEmail, editSetEmail] = useState('');
   const [editPassword, editSetPassword] = useState('');
@@ -85,6 +89,7 @@ export default function Users() {
 
   // Handle user addition
   const handleAddUser = async () => {
+    setAddingUser(true);
     try {
       setError(null);
       setSuccess(null);
@@ -114,24 +119,28 @@ export default function Users() {
       if (!response.ok) {
         const data = await response.json();
         if (data.message && data.message.includes('User already exists.')) {
+           setAddingUser(false);
           throw new Error('Email already taken, use another email.');
         }
+        setAddingUser(false);
         throw new Error(data.error || 'Failed to add user. Please check the email or password.');
+      }else{
+        setAddingUser(false);
       }
 
-      const data = await response.json();
-      console.log('Add User API Response:', data);
       setSuccess('User added successfully!');
         setTimeout(() => {
           handleModalClose();
           fetchUsers();
         }, 1500);
+
     } catch (err) {
       setError(err.message || 'Something went wrong. Please try again.');
       console.error('Error adding user:', err);
       if (err.message.includes('No authentication token')) {
         navigate('/');
       }
+       setAddingUser(false);
     }
   };
 
@@ -186,19 +195,6 @@ export default function Users() {
     }
   }
 
-  const [modalActive, setModalActive] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-
-      const handleOpenModal = useCallback((userId) => {
-        setSelectedUserId(userId);
-        setModalActive(true)
-      }, []);
-
-     const handleCloseModal = useCallback(() => {
-      setModalActive(false);
-      setSelectedUserId(null); // clear selected user on close
-     }, []);
-
   // Handle Delete
   const handleDelete = async (userId) => {
 
@@ -221,7 +217,7 @@ export default function Users() {
       if (!response.ok) {
         throw new Error('Failed to delete user.');
       }
-       setModalActive(false);
+       setModalOpens(false);
         fetchUsers();
     } catch (err) {
       setError(err.message || 'Failed to delete user.');
@@ -234,13 +230,39 @@ export default function Users() {
   const rows = users.map((user) => [
     user.email,
     user.password,
-    <Button key={`edit-${user._id}`} onClick={() => editUser(user._id, user.email, user.password)}>
+    <Button id="edit-icon" icon={EditIcon} key={`edit-${user._id}`} onClick={() => editUser(user._id, user.email, user.password)} >
       Edit
     </Button>,
-    <Button key={`delete-${user._id}`} destructive onClick={() => handleOpenModal(user._id)}>
+    <Button id="delete-icon" icon={DeleteIcon} key={`delete-${user._id}`} destructive onClick={() => handleOpen('Delete User', 'Are you sure you want to delete this user?', 'Delete', user._id)}>
       Delete
     </Button>,
   ]);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+        const [modalOpens, setModalOpens] = useState(false);
+        const [modalContent, setModalContent] = useState(null);
+        const [modalTitles, setModalTitles] = useState('');
+        const [eventTitle, setEventTitle] = useState('');
+        const [selectedUserId, setSelectedUserId] = useState(null);
+
+          const handleOpen = (title, content, eventTitle, userId) => {
+            setModalTitles(title);
+            setModalContent(content);
+            setModalOpens(true);
+            setEventTitle(eventTitle);
+            setSelectedUserId(userId);
+          };
+
+          const closeModals = () =>{
+            setModalOpens(false);
+            setSelectedUserId(null);
+            setEventTitle('');
+            setModalTitles('');
+            setModalContent('');
+          }
 
   return (
   <>
@@ -282,6 +304,11 @@ export default function Users() {
                 {success}
               </Banner>
             )}
+          {addingUser ? (
+            <div style={{ textAlign: 'center', padding: '1rem' }}>
+            <Spinner accessibilityLabel="adding user..." size="large" />
+          </div>
+          ) : (
             <FormLayout>
               <TextField
                 label="Email"
@@ -294,14 +321,25 @@ export default function Users() {
               />
               <TextField
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(value) => setPassword(value)}
                 error={password && !isValidPassword(password) ? 'Password must be at least 8 characters long.' : null}
                 helpText="Password must be at least 8 characters."
                 autoComplete="current-password"
+                suffix={
+                <span
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: 'pointer', backgroundColor:"red" }}
+                  role="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <Icon source={showPassword ? HideIcon : ViewIcon} />
+                </span>
+                }
               />
             </FormLayout>
+          )}
           </LegacyStack>
         </Modal.Section>
       </Modal>
@@ -389,12 +427,22 @@ export default function Users() {
               />
               <TextField
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={editPassword}
                 onChange={(value) => editSetPassword(value)}
                 autoComplete="current-password"
                 error={editPassword && !isValidPassword(editPassword) ? 'Password must be at least 8 characters long.' : null}
                 helpText="Enter a new password to update, or leave blank to keep the existing password. Password must be at least 8 characters."
+                suffix={
+                <span
+                onClick={togglePasswordVisibility}
+                style={{ cursor: 'pointer', backgroundColor:"red" }}
+                role="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                <Icon source={showPassword ? HideIcon : ViewIcon} />
+                </span>
+                }
               />
             </FormLayout>
           </LegacyStack>
@@ -413,33 +461,9 @@ export default function Users() {
         </EmptyState>
         </div>
       )}
-       <div style={{ height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Modal
-              activator={handleOpenModal}
-              open={modalActive}
-              onClose={handleCloseModal}
-              title="Delete User"
-              primaryAction={{
-                content: 'Delete',
-                onAction: () => handleDelete(selectedUserId),
-                destructive: true,
-              }}
-              secondaryActions={[
-                {
-                  content: 'Cancel',
-                  onAction: handleCloseModal,
-                },
-              ]}
-            >
-              <Modal.Section>
-                <div className="modal-content">
-                  <Text variant="headingMd" as="h6">
-                   Are you sure you want to delete this user?
-                  </Text>
-                </div>
-              </Modal.Section>
-            </Modal>
-        </div>
+        <CustomModal open={modalOpens} onClose={() => closeModals()} onAction={() => handleDelete(selectedUserId)} title={modalTitles} buttonText={eventTitle}>
+        {modalContent}
+      </CustomModal>
   </>
   );
 }

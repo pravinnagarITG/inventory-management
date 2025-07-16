@@ -39,7 +39,7 @@ body {
 .main-login-page{
     background-image: url('/public/bg.png');
     background-repeat: no-repeat;
-    background-size: 100%;
+    background-size: cover;
 }
 .main-login-page .Polaris-TextField__Backdrop{
     background-color: #c1dfe338 !important;
@@ -112,7 +112,31 @@ a.active {
 .Polaris-TextField input:-internal-autofill-selected {
  background-color: #c1dfe338 !important;
 }
-@media screen and (max-width: 900px) {
+button#toggle {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    display: none;
+    padding-right: 10px;
+}
+button#toggle .Polaris-Icon svg {
+    fill: #fff;
+    width: 30px;
+    height: 30px;
+}
+button#toggle .Polaris-Icon {
+    width: 25px;
+    height: 25px;
+}
+.toogle-close{
+  display: none;
+}
+#edit-icon .Polaris-Icon, #delete-icon .Polaris-Icon{
+    width: 16px;
+    height: 16px;
+}
+@media screen and (max-width: 1024px) {
 .dasborad-content {
     flex-wrap: wrap;
 }
@@ -120,15 +144,65 @@ a.active {
     width: 100%;
     height: auto;
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
 }
 .right-side-content {
     width: 100%;
 }
+.dashboard-options{
+  position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100%;
+    background: #000;
+    transition: left 0.3s ease-in-out;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+  .dashboard-options.open{
+    left: 0;
+  }
+button#toggle{
+  display: block;
+}
+.toogle-close{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20px;
+}
+}
+@media screen and (max-width: 768px) {
+.Polaris-TextField__Spinner {
+    width: 1rem !important;
+}
+   #PolarisPortalsContainer .Polaris-Modal-Dialog__Modal {
+    max-height: 100%;
+    position: relative;
+    max-width: 38.75rem;
+    margin: 0 auto;
+    border-radius: var(--p-border-radius-400);
+}
+  #PolarisPortalsContainer .Polaris-Modal-Dialog__Container{
+    justify-content: center;
+  }
+}
+@media screen and (max-width: 620px) {
+   #PolarisPortalsContainer .Polaris-Modal-Dialog__Modal {
+    max-width: 27rem;
+}
+}
+@media screen and (max-width: 450px) {
+   #PolarisPortalsContainer .Polaris-Modal-Dialog__Modal {
+    max-width: 19rem;
+}
 }
 
-
     /* Custom CSS for slide-down and slide-up animations */
+
     .Polaris-Modal-Dialog {
       animation: slideDown 0.6s ease-out forwards;
     }

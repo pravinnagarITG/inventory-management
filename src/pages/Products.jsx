@@ -1,6 +1,7 @@
-import {Page, LegacyCard, DataTable , Text, Spinner, Modal, DropZone, LegacyStack, TextField, Banner, Badge, Card, Thumbnail} from '@shopify/polaris';
+import {Page, LegacyCard, DataTable , Text, Spinner, Modal, DropZone, LegacyStack, TextField, Badge, Card, Thumbnail} from '@shopify/polaris';
 import { ExportIcon, ImportIcon } from '@shopify/polaris-icons';
 import { useEffect, useState, useCallback } from 'react';
+import CustomModal from '../CustomModal';
 
 export default function Products() {
 
@@ -22,10 +23,12 @@ const [modalOpen, setModalOpen] = useState(false);
 const [modalTitle, setModalTitle] = useState('');
 const [files, setFiles] = useState([]);
 
-const [error, setError] = useState(null);
-const [success, setSuccess] = useState(null);
-
 const [msg, loadingMsg] = useState('Loading Products...');
+
+const [modalOpens, setModalOpens] = useState(false);
+const [modalContent, setModalContent] = useState(null);
+const [modalTitles, setModalTitles] = useState('');
+const [eventTitle, setEventTitle] = useState('');
 
   // Handle DropZone file upload
   const handleDropZoneDrop = useCallback(
@@ -220,6 +223,7 @@ useEffect(() => {
 
   // sync
 const syncProducts = async () => {
+  disbVal(true);
   setLoading(true);
   loadingMsg("Syncing Products...");
     try {
@@ -242,6 +246,7 @@ const syncProducts = async () => {
       if (response.ok) {
         syncBtnDisable(false); 
         setLoading(false);
+        disbVal(false);
       }
       if (!response.ok) {
         throw new Error('Failed to sync products.');
@@ -258,8 +263,6 @@ const syncProducts = async () => {
 // Export CSV file
   const exportFile = async () => {
     try {
-      setError(null);
-      setSuccess(null);
       const token = localStorage.getItem('authToken');
       if (!token) {
         throw new Error('No authentication token found. Please log in.');
@@ -277,7 +280,6 @@ const syncProducts = async () => {
       }
 
       const csvData = await response.text();
-      // Create a Blob for the CSV data
       const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -287,26 +289,29 @@ const syncProducts = async () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      setSuccess('CSV file downloaded successfully!');
+      handleOpen('Export File', 'CSV file downloaded successfully!', 'Ok');
     } catch (err) {
-      setError(err.message || 'Failed to export CSV file.');
-      console.error('Export failed:', err);
+       handleOpen('Export File', err.message || 'Failed to export CSV file.', 'Ok');
+       console.error('Export failed:', err);
     }
   };
 
+        const handleOpen = (title, content, eventTitle) => {
+            setModalTitles(title);
+            setModalContent(content);
+            setModalOpens(true);
+            setEventTitle(eventTitle);
+          };
+
+        const closeModals = () =>{
+            setModalTitles('');
+            setModalContent('');
+            setModalOpens(false);
+            setEventTitle('');
+         }
+
   return (
   <>
-    {error && (
-      <Banner status="critical" title="Error" onDismiss={() => setError(null)}>
-        {error}
-      </Banner>
-    )}
-    {success && (
-      <Banner status="success" title="Success" tone="success" onDismiss={() => setSuccess(null)}>
-        {success}
-      </Banner>
-    )}
   <Page fullWidth
       title="Inventory Manage"
       actionGroups={[
@@ -416,6 +421,9 @@ const syncProducts = async () => {
           </LegacyStack>
         </Modal.Section>
       </Modal>
+       <CustomModal open={modalOpens} onClose={() => closeModals()} title={modalTitles} buttonText={eventTitle}>
+        {modalContent}
+      </CustomModal>
     </>
   );
 }
